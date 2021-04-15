@@ -1,0 +1,13 @@
+{
+  "name": "text-animation",
+  "version": "0.1",
+  "main": "index.html",
+  "author": "CGIL",
+  "license": "MIT",
+  "scripts": {
+    "start": "lite-server"
+  },
+  "devDependencies": {
+    "lite-server": "^2.6.1"
+  }
+}
