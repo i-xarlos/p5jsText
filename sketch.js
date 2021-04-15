@@ -1,10 +1,5 @@
-var points;
 var font;
-var amt;
-var multiplier = 0.2;
-var r = [];
-var g = [];
-var b = [];
+const letters = [];
 
 function preload() {
   font = loadFont("assets/Calistoga-Regular.ttf");
@@ -12,39 +7,99 @@ function preload() {
 
 // called once
 function setup() {
-  createCanvas(1600, 500);
-  //textFont(font);
-  //textSize(30);
+  createCanvas(800, 250);
 
-  // Retrieve text points
-  points = font.textToPoints("Hello P5.js", 50, 300, 300, {
-    sampleFactor: 0.3,
-    simplifyThreshold: 0,
-  });
+  background(255, 0, 0);
+  const str = "UNDERCURRENT";
+  const wordsStr = str.split("");
+
+  textFont(font);
+  textSize(70);
+  textAlign(0, CENTER);
+
+  let x = 40;
+  let y = height / 2.2;
+
+  fill(0);
+
+  for (let i = 0; i < wordsStr.length; i++) {
+    const wordStr = wordsStr[i]; // get current word
+    const wordStrWidth = textWidth(wordStr); // get current word width
+    const word = new Word(wordStr, x, y, i);
+    //text(wordStr, x, y); // display word
+    letters.push(word);
+
+    x = x + wordStrWidth + textWidth(" "); // update x by word width + space character
+  }
 }
 
 // called every frame
 function draw() {
-  var trail = map(mouseY, 0, height, 1, 10);
-  //background(255, 255, 0);
-  //text("hola", 0, 0);
-  //fill(0);
-  fill(0, trail);
-  rect(0, 0, width, height);
+  background(255, 255, 0);
 
-  noStroke();
-  for (let i = 0; i < points.length; i++) {
-    // Set color
-    fill(214, 0, 0);
+  for (let i = 0; i < letters.length; i++) {
+    const letter = letters[i]; // retrieve word object
+    letter.update();
+    letter.display();
+  }
+}
 
-    // Get locations
-    var p = points[i];
-    amt = map(mouseX, 0, width, 0, 80);
-    var nX = noise(p.x + p.y + frameCount * multiplier);
-    var locX = map(nX, 0, 1, -amt, amt);
-    var nY = noise(p.x + p.y + 2 + frameCount * multiplier);
-    var locY = map(nY, 0, 1, -amt, amt);
-    // create ellipse
-    ellipse(p.x + locX, p.y + locY, 2, 2);
+let interval = null;
+
+function mousePressed() {
+  console.log("hola");
+  for (let i = 0; i < letters.length; i++) {
+    const letter = letters[i];
+    letter.spread();
+  }
+
+  clearInterval(interval);
+  interval = setInterval(reset, 1000);
+}
+
+function reset() {
+  console.log("reset");
+  for (let i = 0; i < letters.length; i++) {
+    const letter = letters[i];
+    letter.reset();
+  }
+}
+
+class Word {
+  constructor(word, x, y, idx) {
+    this.word = word;
+
+    this.origx = x;
+    this.origy = y;
+
+    this.x = x;
+    this.y = y;
+    // target position is the same as current position at start
+    this.tx = this.x;
+    this.ty = this.y;
+    this.idx = idx;
+    this.fcolor = color(255);
+  }
+
+  spread() {
+    this.tx = random(width);
+    this.ty = random(height);
+  }
+
+  update() {
+    // move towards the target by 10% each time
+    this.x = lerp(this.x, this.tx, 0.1);
+    this.y = lerp(this.y, this.ty, 0.1);
+  }
+
+  display() {
+    fill(this.fcolor);
+    noStroke();
+    text(this.word, this.x, this.y);
+  }
+
+  reset() {
+    this.tx = this.origx;
+    this.ty = this.origy;
   }
 }
