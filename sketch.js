@@ -1,8 +1,9 @@
 let font;
 const letters = [];
-const acc = 1;
 let count = 1;
-let graphics = null;
+let graphics1 = null;
+let graphics2 = null;
+let fr = 40;
 
 function preload() {
   font = loadFont("assets/Ramabhadra-Regular.ttf");
@@ -12,20 +13,27 @@ function preload() {
 function setup() {
   createCanvas(800, 250);
   pixelDensity(1);
+  frameRate(fr);
 
-  background(255, 255, 0);
-  graphics = createGraphics(600, 125);
+  background(0);
 
-  const str = "UNDERCURRENT";
-  const wordsStr = str.split("");
+  graphics1 = createGraphics(width, 125);
+  graphics2 = createGraphics(width, 125);
 
+  createLetters("UNDERCURRENT", graphics1, 58, 113, 0.9);
+  createLetters("UNDERCURRENT", graphics2, 58, -10, 0.7);
+}
+
+const createLetters = (TEXT, graphics, xPos, yPos, acc) => {
   graphics.textFont(font);
-  graphics.textSize(35);
+  graphics.textSize(40);
   graphics.textAlign(0, CENTER);
   graphics.background(255, 0, 255);
+  const str = TEXT;
+  const wordsStr = str.split("");
 
-  let x = 0;
-  let y = 0;
+  let x = xPos;
+  let y = yPos;
 
   graphics.fill(0);
 
@@ -34,22 +42,22 @@ function setup() {
   for (let i = 0; i < wordsStr.length; i++) {
     const wordStr = wordsStr[i]; // get current word
     const wordStrWidth = graphics.textWidth(wordStr + 1); // get current word width
-    const word = new Word(wordStr, x, y, i, total, graphics);
+    const word = new Word(wordStr, x, y, i, total, graphics, acc);
     //text(wordStr, x, y); // display word
     letters.push(word);
 
     x = x + wordStrWidth + 5; // update x by word width + space character
   }
-}
+};
 
 let drawInterval = null;
 // called every frame
 function draw() {
-  //console.log("draw");
-  image(graphics, 0, 0);
-  image(graphics, 0, 130);
+  image(graphics1, 0, 0);
+  image(graphics2, 0, 125);
 
-  graphics.background(220);
+  graphics1.background(0);
+  graphics2.background(0);
 
   for (let i = 0; i < letters.length; i++) {
     const letter = letters[i]; // retrieve word object
@@ -63,7 +71,7 @@ function draw() {
 setInterval(() => {
   count = count + 1;
   const direction = count % 2 ? -1 : +1;
-  move((direction / 1.5) * acc);
+  move(direction / 1.5);
 }, 1500);
 
 let interval = null;
@@ -89,10 +97,11 @@ function reset() {
 }
 
 class Word {
-  constructor(word, x, y, idx, total, graphics) {
+  constructor(word, x, y, idx, total, graphics, acc = 1) {
     this.word = word;
     this.total = total;
     this.graphics = graphics;
+    this.acc = acc;
 
     this.origx = x;
     this.origy = y;
@@ -105,19 +114,17 @@ class Word {
     this.idx = idx;
 
     this.fcolor = color(255, 255, 255);
-    this.count = 0;
   }
 
   spread(direction = -1) {
-    //this.graphics.background(0);
     const space = (value) => value * 0.15 * 100;
     let pos = 0;
 
     if (this.idx >= this.total / 2) {
       pos = space(this.idx - 12);
-      this.tx += pos * direction;
+      this.tx += pos * direction * this.acc;
     } else {
-      this.tx -= space(this.idx) * direction;
+      this.tx -= space(this.idx) * direction * this.acc;
     }
   }
 
@@ -136,6 +143,5 @@ class Word {
   reset() {
     this.tx = this.origx;
     this.ty = this.origy;
-    this.count = 0;
   }
 }
